@@ -1,0 +1,70 @@
+# === General ===
+*.log
+*.env
+.env.*
+*.pyc
+__pycache__/
+.DS_Store
+.vscode/
+.idea/
+*.sqlite3
+*.db
+*.bak
+*.swp
+*.tmp
+
+# === Python (FastAPI backend) ===
+# Entornos virtuales
+rag-local-api/venv/
+rag-local-api/env/
+rag-local-api/.venv/
+rag-local-api/__pycache__/
+*.py[cod]
+
+# Archivos de pruebas o caché
+.coverage
+.tox/
+.cache/
+.mypy_cache/
+.pytest_cache/
+dist/
+build/
+
+# === React ux-react ===
+# Node modules y build
+ux-react/node_modules/
+ux-react/dist/
+ux-react/build/
+ux-react/.next/
+ux-react/.turbo/
+
+# Archivos temporales
+ux-react/npm-debug.log*
+ux-react/yarn-debug.log*
+ux-react/yarn-error.log*
+ux-react/pnpm-debug.log*
+
+# Archivos de configuración
+ux-react/.env
+ux-react/.env.*.local
+ux-react/.parcel-cache/
+ux-react/.eslintcache
+
+# === Sistema operativo ===
+# macOS
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# === Git ===
+*.orig
+*.rej

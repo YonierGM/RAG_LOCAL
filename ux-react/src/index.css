@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+body {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+strong {
+  font-weight: 600;
+}
+.home > ol,
+.home > ul {
+  margin-left: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home > li {
+  list-style: disc;
+}
