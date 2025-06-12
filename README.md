@@ -79,7 +79,7 @@ Una vez que hayas instalado los modelos de embeddings y LLM, puedes elegir cuál
 
 <p>** Interfaz principal **</p>
 <p align="center">
-<img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/home.png?raw=true"/>
+<img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/home-rag.png?raw=true"/>
 </p>
 
 <p>** embeddings y borrado **</p>
