@@ -64,9 +64,10 @@ docker compose up --build
 Accede al contenedor de ollama `Containers/rag_local-ollama-1` y ejecutar los comandos:
 
 <p align="center">
-<img style="width:100%; height:100%;" src="https://github.com/YonierGM/imagenes-proyecto/blob/master/container-1.png?raw=true/>
+<img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/Contenedor.png />
 </p>
 
+Comandos:
 ```bash
 ollama pull mxbai-embed-large
 ollama run llama3.2
