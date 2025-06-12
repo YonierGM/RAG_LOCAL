@@ -65,13 +65,9 @@ Accede al contenedor de ollama `Containers/rag_local-ollama-1` y ejecutar los co
 
 <p>** Referencia **</p>
 <p align="center">
-<img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/Contenedor.png />
+<img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/Contenedor.png?raw=true"/>
 </p>
 
-<p>** success **</p>
-<p align="center">
-<img style="width:100%; height:100%;" src="https://github.com/YonierGM/imagenes-proyecto/blob/master/validate-form/exito.png?raw=true"/>
-</p>
 
 Comandos:
 ```bash
