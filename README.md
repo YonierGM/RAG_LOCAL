@@ -8,6 +8,16 @@ Este proyecto implementa una API local de Recuperación Aumentada por Generació
 - 🧠 **ChromaDB** como base vectorial para recuperación semántica
 - 🐳 **Docker Compose** para contenerizar todo
 
+
+## 🚀 ¿Qué hace este proyecto?
+
+1. ✅ Permite subir documentos para extraer su contenido y almacenarlo como embeddings usando `mxbai-embed-large`.
+2. 🔍 Usa `LangChain` con `Chroma` como base vectorial persistente para consultas semánticas.
+3. 🤖 Usa modelos LLM locales como `llama3` mediante **Ollama** para responder preguntas.
+4. 🧩 Implementa `chat history`, re-ingesta, y control de errores con archivos corruptos o no extraíbles.
+5. 🧾 La interfaz en React permite interactuar con la IA como un chat.
+
+
 ## ⚙️ Tecnologías principales
 
 - LLM: `llama3.2:latest` o el de tu preferencia
@@ -17,6 +27,16 @@ Este proyecto implementa una API local de Recuperación Aumentada por Generació
 - Gestión de prompts y memoria contextual: LangChain
 
 ---
+
+
+### 📂 Funcionalidades del Backend (FastAPI)
+- `POST /ingest`: Ingresa documentos (PDF, DOCX, TXT). Maneja errores comunes.
+- `POST /ask_model`: Consulta al modelo con una pregunta y contexto extraído de los documentos.
+- `DELETE /reset_embeddings`: Limpia toda la base de datos vectorial para nuevas ingestiones.
+- 
+---
+
+
 
 ## 🚀 Paso a paso para levantar el proyecto
 
