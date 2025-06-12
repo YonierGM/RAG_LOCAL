@@ -56,3 +56,18 @@ cd RAG_LOCAL
 ```bash
 docker compose up --build
 ```
+
+### 3. Instalar modelos en el contenedor de ollama
+- Modelo de embeddings `mxbai-embed-large`
+- modelo LLM `llama3.2`
+
+Accede al contenedor de ollama `Containers/rag_local-ollama-1` y ejecutar los comandos:
+
+<p align="center">
+<img style="width:100%; height:100%;" src="https://github.com/YonierGM/imagenes-proyecto/blob/master/Contenedor.png?raw=true/>
+</p>
+
+```bash
+ollama pull mxbai-embed-large
+ollama run llama3.2
+```
