@@ -8,6 +8,11 @@ Este proyecto implementa una API local de Recuperación Aumentada por Generació
 - 🧠 **ChromaDB** como base vectorial para recuperación semántica
 - 🐳 **Docker Compose** para contenerizar todo
 
+## 🐳 Requisitos previos
+
+- [Docker](https://www.docker.com/)
+---
+
 
 ## 🚀 ¿Qué hace este proyecto?
 
