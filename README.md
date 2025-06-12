@@ -63,7 +63,7 @@ docker compose up --build
 
 Accede al contenedor de ollama `Containers/rag_local-ollama-1` y ejecutar los comandos:
 
-<p>** Referencia **</p>
+### Referencia
 <p align="center">
 <img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/Contenedor.png?raw=true"/>
 </p>
@@ -77,12 +77,12 @@ ollama run llama3.2
 
 Una vez que hayas instalado los modelos de embeddings y LLM, puedes elegir cuál utilizar desde el selector ubicado en la esquina inferior izquierda de la interfaz. Siéntete libre de probar diferentes modelos que hayas instalado.
 
-<p>** Interfaz principal **</p>
+### Interfaz principal
 <p align="center">
 <img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/home-rag.png?raw=true"/>
 </p>
 
-<p>** embeddings y borrado **</p>
+### embeddings y borrado
 <p align="center">
 <img style="width:100%; height:100%;" src="https://raw.githubusercontent.com/YonierGM/imagenes-proyecto/refs/heads/master/settings.png?raw=true"/>
 </p>
