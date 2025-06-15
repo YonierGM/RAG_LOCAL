@@ -1,6 +1,6 @@
+// src/Home.jsx
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useChatLLM } from "../hooks/useChatLLM";
 import { useState, useRef, useEffect } from "react";
 
 import ReactMarkdown from "react-markdown";
@@ -8,18 +8,27 @@ import remarkGfm from "remark-gfm";
 
 import { Link } from "react-router-dom";
 
+import { useChatLLM } from "../hooks/useChatLLM";
+import { useChatHistory } from "../hooks/useChatHistory";
+import { formatDate } from "../utils/formatUtils";
+
 function Home() {
-  const [params, setParams] = useState(null);
-  const url = "http://localhost:8000/ask_model";
+  const askModelUrl = "http://localhost:8000/ask_model";
+  const historyUrl = "http://localhost:8000/history";
+
   const chatContainerRef = useRef(null);
+
+  const { chatHistory, setChatHistory, isLoadingHistory, historyError } = useChatHistory(historyUrl);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     resetField,
+    setValue,
   } = useForm();
 
+  const [params, setParams] = useState(null);
   const { data, loading, error, models } = useChatLLM(
     params?.model,
     params?.question,
@@ -27,68 +36,58 @@ function Home() {
     params?.triggerId
   );
 
+  useEffect(() => {
+    if (data && data.history) {
+      setChatHistory(data.history);
+    }
+  }, [data, setChatHistory]);
+
+  useEffect(() => {
+    if (models.length > 0) {
+      setValue("model", models[0]);
+    }
+  }, [models, setValue]);
+
   const onSubmit = ({ model, question }) => {
-    setParams({ model, question, url, triggerId: Date.now() });
+    setParams({ model, question, url: askModelUrl, triggerId: Date.now() });
     resetField("question");
   };
 
-  function formatDate(isoDateStr) {
-    const date = new Date(isoDateStr);
-
-    const monthNames = [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
-    ];
-
-    const day = date.getDate();
-    const monthIndex = date.getMonth();
-    const year = date.getFullYear();
-
-    const hour = date.getHours().toString().padStart(2, "0");
-    const minute = date.getMinutes().toString().padStart(2, "0");
-
-    return `${monthNames[monthIndex]} ${day}, ${year} ${hour}:${minute}`;
-  }
-
-  // Auto scroll al final del chat
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [data]);
+  }, [chatHistory, isLoadingHistory]);
 
   return (
     <div className="home flex flex-col h-screen min-md:w-[80%] mx-auto">
-      {/* Contenedor de mensajes estilo chat */}
+      {/* Contenedor de mensajes de chat */}
       <div
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto px-4 py-6 space-y-4"
       >
-        {error && <span className="text-red-500">{error}</span>}
+        {/* Muestra errores combinados */}
+        {(error || historyError) && (
+          <span className="text-red-500">{error || historyError}</span>
+        )}
 
-        {data?.history.map((item, index) => (
+        {/* Indicador de carga del historial inicial */}
+        {isLoadingHistory && <p>Cargando historial...</p>}
+
+        {/* Renderiza el historial de chat */}
+        {!isLoadingHistory && chatHistory.map((item, index) => (
           <div key={index} className="space-y-2">
             {/* Pregunta del usuario */}
-            <div className="flex justify-start">
-              <div className=" text-gray-900 rounded-xl p-3 w-auto min-md:max-w-[90%]">
+            <div className="flex justify-end">
+              <div className="bg-gray-100 text-gray-900 rounded-xl p-3 w-auto min-md:max-w-[90%]">
                 <p>{item.question}</p>
               </div>
             </div>
 
             {/* Respuesta de la IA con Markdown */}
-            <div className="flex justify-end">
-              <div className="bg-gray-100 text-gray-900 rounded-xl p-3 min-md:w-[90%]">
+            <div className="flex justify-start">
+              <div className="text-gray-900 rounded-xl p-3 min-md:w-[90%]">
                 <div className="prose prose-sm dark:prose-invert max-w-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {item.answer}
@@ -96,14 +95,14 @@ function Home() {
                 </div>
               </div>
             </div>
-            <span className="text-xs text-gray-500 flex justify-end">
+            <span className="px-3 text-xs text-gray-500 flex justify-start">
               {formatDate(item.timestamp)}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Input fijo al fondo */}
+      {/* Formulario de entrada (resto del código igual) */}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex gap-1 pt-4 border-t bg-white dark:bg-gray-800"
@@ -123,7 +122,11 @@ function Home() {
           </select>
         </div>
 
-        {/* Campo de pregunta */}
+        {errors.model && (
+          <p className="text-red-500 text-sm">selecciona un modelo</p>
+        )}
+
+        {/* Campo de entrada de la pregunta */}
         <div className="flex items-center w-full">
           <div className="relative w-full">
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -152,13 +155,13 @@ function Home() {
             />
           </div>
 
-          {/* Botón enviar */}
+          {/* Botón de enviar */}
           <button
             disabled={loading}
             type="submit"
             className="inline-flex items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 dark:bg-blue-600"
           >
-            {loading && (
+            {loading ? (
               <svg
                 aria-hidden="true"
                 role="status"
@@ -176,7 +179,7 @@ function Home() {
                   fill="currentColor"
                 />
               </svg>
-            )}
+            ) : null}
             {loading ? "Consultando..." : "Consultar"}
           </button>
         </div>
@@ -186,7 +189,7 @@ function Home() {
         to="/settings"
       >
         <svg
-          class="w-6 h-6 text-gray-800 dark:text-white"
+          className="w-6 h-6 text-gray-800 dark:text-white"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -195,9 +198,9 @@ function Home() {
           viewBox="0 0 24 24"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M17 10v1.126c.367.095.714.24 1.032.428l.796-.797 1.415 1.415-.797.796c.188.318.333.665.428 1.032H21v2h-1.126c-.095.367-.24.714-.428 1.032l.797.796-1.415 1.415-.796-.797a3.979 3.979 0 0 1-1.032.428V20h-2v-1.126a3.977 3.977 0 0 1-1.032-.428l-.796.797-1.415-1.415.797-.796A3.975 3.975 0 0 1 12.126 16H11v-2h1.126c.095-.367.24-.714.428-1.032l-.797-.796 1.415-1.415.796.797A3.977 3.977 0 0 1 15 11.126V10h2Zm.406 3.578.016.016c.354.358.574.85.578 1.392v.028a2 2 0 0 1-3.409 1.406l-.01-.012a2 2 0 0 1 2.826-2.83ZM5 8a4 4 0 1 1 7.938.703 7.029 7.029 0 0 0-3.235 3.235A4 4 0 0 1 5 8Zm4.29 5H7a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h6.101A6.979 6.979 0 0 1 9 15c0-.695.101-1.366.29-2Z"
-            clip-rule="evenodd"
+            clipRule="evenodd"
           />
         </svg>
         Ajustes

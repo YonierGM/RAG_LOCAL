@@ -17,7 +17,7 @@ LOADERS = {
 
 def is_valid_model(model_name: str) -> bool:
     try:
-        response = requests.get("http://ollama:11434/api/tags")  # Ollama por defecto
+        response = requests.get("http://ollama:11434/api/tags")
         response.raise_for_status()
         models = response.json().get("models", [])
         available = [m["name"] for m in models]

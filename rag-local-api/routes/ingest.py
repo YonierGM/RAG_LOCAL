@@ -1,7 +1,8 @@
 import os
 import tempfile
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import List
+from pydantic import BaseModel
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from typing import List, Optional
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import settings
@@ -10,11 +11,26 @@ from langchain_core.documents import Document
 
 router = APIRouter()
 
+class IngestRequest(BaseModel):
+    chunk_size: str
+    chunk_overlap: str
+
 @router.post("/ingest")
-async def ingest(files: List[UploadFile] = File(...)):
+async def ingest(files: List[UploadFile] = File(...),
+    chunk_size: Optional[int] = Form(1000),
+    chunk_overlap: Optional[int] = Form(50)):
+    
     vectordb = settings.get_vectordb()
     if not files:
         raise HTTPException(status_code=400, detail="Debes enviar al menos un archivo.")
+    
+    if chunk_size <= 0:
+        raise HTTPException(status_code=400, detail="chunk_size debe ser un número entero positivo.")
+    if chunk_overlap < 0:
+        raise HTTPException(status_code=400, detail="chunk_overlap no puede ser negativo.")
+    
+    if chunk_overlap >= chunk_size:
+        raise HTTPException(status_code=400, detail="chunk_overlap debe ser menor que chunk_size.")
 
     total_chunks = 0
     indexed_files = []
@@ -64,7 +80,7 @@ async def ingest(files: List[UploadFile] = File(...)):
                 else:
                     processed_documents.append(Document(page_content=str(doc), metadata={"source": file.filename}))
 
-            splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=200)
+            splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             docs = splitter.split_documents(processed_documents)
             vectordb.add_documents(docs)
 
@@ -104,8 +120,6 @@ async def ingest(files: List[UploadFile] = File(...)):
 
     return response
 
-
-
 @router.delete("/reset_embeddings")
 async def reset_embeddings():
     try:
@@ -117,3 +131,7 @@ async def reset_embeddings():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al resetear base de datos: {e}")
+
+@router.get("/debug_collections")
+async def debug_collections_endpoint():
+    return settings.list_all_chroma_collections()

@@ -1,87 +1,26 @@
-import { useState } from "react";
-import { Report } from "notiflix/build/notiflix-report-aio";
 import { Link } from "react-router-dom";
+import { useUploader } from "../hooks/useUploader";
+import { useState } from "react";
 
 function DropzoneUploader() {
-  const [selectedFiles, setSelectedFiles] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const {
+    selectedFiles,
+    result,
+    loading,
+    handleFileChange,
+    handleUpload,
+    handleResetEmbeddings,
+    hasIndexed,
+    hasErrors,
+  } = useUploader();
 
-  const handleFileChange = (event) => {
-    setSelectedFiles(event.target.files);
-    setResult(null); // Limpia resultados anteriores si se selecciona algo nuevo
+  const [chunkSize, setChunkSize] = useState(1000); // Valor por defecto
+  const [chunkOverlap, setChunkOverlap] = useState(50); // Valor por defecto
+
+  //subida con los parámetros de chunking
+  const onUploadClick = () => {
+    handleUpload(chunkSize, chunkOverlap);
   };
-
-  const handleUpload = async () => {
-    if (!selectedFiles || selectedFiles.length === 0) return;
-
-    const formData = new FormData();
-    Array.from(selectedFiles).forEach((file) => {
-      formData.append("files", file);
-    });
-
-    try {
-      setLoading(true);
-      const res = await fetch("http://localhost:8000/ingest", {
-        method: "POST",
-        body: formData,
-      });
-
-      let data;
-      try {
-        data = await res.json();
-      } catch (jsonErr) {
-        throw new Error("Respuesta del servidor no es válida.");
-      }
-
-      if (!res.ok) {
-        throw new Error(
-          data.detail || "Ocurrió un error al subir los archivos."
-        );
-      }
-
-      setResult(data);
-    } catch (err) {
-      setResult({
-        files_indexed: [],
-        total_chunks: 0,
-        errors: [{ file: "Error general", error: err.message }],
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetEmbeddings = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/reset_embeddings", {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        Report.failure(
-          "Error al resetear base de datos",
-          `${data.detail}`,
-          "Okay"
-        );
-        // throw new Error(data.detail || "Error al resetear la base de datos");
-      }
-      console.log("Data: ",data)
-      Report.success("Vaciar base de datos", `${data.message}`, "Okay");
-
-      setSelectedFiles(null);
-      setResult(null);
-    } catch (err) {
-      Report.failure(
-        "Error al resetear base de datos",
-        `${data.detail}`,
-        "Okay"
-      );
-    }
-  };
-
-  const hasIndexed = result?.files_indexed && result.files_indexed.length > 0;
-  const hasErrors = result?.errors && result.errors.length > 0;
 
   return (
     <div className="flex flex-col items-center justify-center w-full gap-4">
@@ -122,9 +61,39 @@ function DropzoneUploader() {
         />
       </label>
 
+      {/* Campos para Chunk Size y Chunk Overlap */}
+      <div className="w-full max-w-md flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <label htmlFor="chunkSizeInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Chunk Size (caracteres):
+          </label>
+          <input
+            id="chunkSizeInput"
+            type="number"
+            value={chunkSize}
+            onChange={(e) => setChunkSize(parseInt(e.target.value) || 0)}
+            className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            min="1" // No permitir 0 o negativos
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="chunkOverlapInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Chunk Overlap (caracteres):
+          </label>
+          <input
+            id="chunkOverlapInput"
+            type="number"
+            value={chunkOverlap}
+            onChange={(e) => setChunkOverlap(parseInt(e.target.value) || 0)}
+            className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            min="0" // Permitir 0, pero no negativos
+          />
+        </div>
+      </div>
+
       {/* Archivos seleccionados */}
       {selectedFiles && selectedFiles.length > 0 && (
-        <div className="w-full max-w-md p-4 bg-white dark:bg-gray-800 border rounded-md shadow">
+        <div className="w-full max-w-md p-4 bg-white dark:bg-gray-800 border rounded-md shadow rounded-lg">
           <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
             Archivos seleccionados:
           </h4>
@@ -138,14 +107,13 @@ function DropzoneUploader() {
 
       {/* Botón de enviar */}
       <button
-        onClick={handleUpload}
-        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 max-sm:w-full sm:w-sm"
+        onClick={onUploadClick}
+        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 max-sm:w-full sm:w-sm rounded-lg shadow"
         disabled={!selectedFiles || loading}
       >
         {loading ? "Subiendo..." : "Subir archivos"}
       </button>
 
-      {/* Resultado */}
       {/* ✅ Éxito */}
       {hasIndexed && (
         <div className="bg-green-100 text-green-800 p-4 rounded-lg max-w-2xl w-full shadow">
@@ -158,8 +126,7 @@ function DropzoneUploader() {
             ))}
           </ul>
           <p className="text-sm">
-            🧠 Se generaron <strong>{result.total_chunks}</strong> fragmentos de
-            texto para búsqueda contextual.
+            🧠 Se generaron <strong>{result.total_chunks}</strong> fragmentos de texto.
           </p>
         </div>
       )}
@@ -182,15 +149,15 @@ function DropzoneUploader() {
 
       <button
         onClick={handleResetEmbeddings}
-        className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 max-sm:w-full sm:w-sm"
+        className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 max-sm:w-full sm:w-sm rounded-lg shadow"
       >
         Limpiar la base de datos
       </button>
 
-      <Link className="" to="/">
+      <Link to="/">
         <button
           type="button"
-          class="cursor-pointer py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 max-sm:w-full sm:w-sm"
+          className="cursor-pointer py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 max-sm:w-full sm:w-sm shadow"
         >
           Volver
         </button>

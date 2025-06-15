@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from routes.ingest import router as ingest_router
 from routes.ask import router as ask_router
 from routes.model import router as model_router
+from routes.history import router as history_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -17,7 +18,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Cambia según tu frontend
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,3 +30,4 @@ def root():
 app.include_router(ingest_router)
 app.include_router(ask_router)
 app.include_router(model_router)
+app.include_router(history_router)

@@ -1,34 +1,69 @@
 services:
   ollama:
     image: ollama/ollama
+    container_name: ollama-ai
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - ai-network # Asignar a la red compartida
 
   api:
     build:
       context: ./rag-local-api
       dockerfile: Dockerfile
+    container_name: api-service
     volumes:
       - ./rag-local-api:/app
-      - chroma_data:/app/chroma_db_e5 # Nombre claro y separado
+      - chroma_data:/app/chroma_db_e5
     ports:
       - "8000:8000"
     environment:
       - OLLAMA_HOST=http://ollama:11434
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
     depends_on:
       - ollama
+      - redis
+    networks:
+      - ai-network # Asignar a la red compartida
+
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-network # Asignar a la red compartida
 
   frontend:
     build:
       context: ./ux-react
       dockerfile: Dockerfile
+    container_name: frontend-app
     ports:
       - "3000:80"
     depends_on:
       - api
+    networks:
+      - ai-network
 
 volumes:
   chroma_data:
   ollama_data:
+  redis_data:
+
+networks:
+  ai-network: # Definir la red compartida
+    driver: bridge

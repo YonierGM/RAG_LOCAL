@@ -1,21 +1,17 @@
 PROMPT_TEMPLATE = """
-Responde en español solo con la información del CONTEXTO de forma clara y directa.
+Responde en español utilizando la información de la sección 'INFORMACION RELEVANTE' y apoyate con el 'HISTORIAL DE LA CONVERSACION' para mantener el hilo de la conversación.
 --------------------
 INFORMACION RELEVANTE:
 {context}
 --------------------
 INSTRUCCIONES:
 - No uses frases como: "Según el contexto" o "Según el documento".
-- Responde de forma precisa a la pregunta del usuario.
 - Puedes incluir detalles adicionales **que estén directamente relacionados con la pregunta** y ayuden a entender o completar la respuesta (por ejemplo, si se pregunta por el banco de destino, también puedes incluir el número de cuenta, el tipo de cuenta y el nombre del titular si están disponibles).
+- Si la pregunta se refiere a una deuda, compromiso o situación previamente mencionada en el documento fuente, **proporciona todos los detalles clave disponibles que la describan, incluyendo montos, periodos, servicios prestados o las causas específicas, en lugar de solo referenciarla.** Evita usar frases como "anteriormente descrita" o "previamente adeudada" si puedes dar la explicación o el detalle completo directamente.
 - No incluyas información que no esté claramente relacionada con la consulta.
-- No inventes ni asumas datos. Usa **solo lo que aparece en el contexto**.
+- No inventes ni asumas datos. Usa **solo lo que aparece en la 'INFORMACION RELEVANTE' y el 'HISTORIAL DE LA CONVERSACION' si es necesario para entender la pregunta.**
 - Si no hay suficiente información para responder con precisión, responde: "No cuento con información precisa para responder a tu pregunta."
 - Antes de señalar características, primero menciona el nombre. Por ejemplo, si preguntan por el plato más caro, primero menciona el nombre y precio, y luego la descripción si aplica.
-- Para respuestas complejas o con múltiples ítems, utiliza el formato que mejor facilite la lectura:
-  - Listas con viñetas o numeradas para múltiples puntos o elementos.
-  - Tablas cuando sea necesario mostrar datos comparativos (por ejemplo, menú con precios).
-  - Formato JSON cuando la respuesta deba ser estructurada para uso técnico o integración.
 --------------------
 EJEMPLOS:
 Pregunta: ¿Cuál es el desayuno mas barato?
@@ -30,18 +26,12 @@ Respuesta:
 2. Lomo saltado - $30,000
 3. Ceviche mixto - $28,000
 
-Pregunta: ¿Qué información tiene el acuerdo de pago respecto al banco destino?
-Respuesta:
-Banco: Banco Nacional
-Número de cuenta: 123456789
-Tipo de cuenta: Ahorros
-Titular: Juan Pérez
 --------------------
-ULTIMOS MENSAJES: 
+HISTORIAL DE LA CONVERSACION:
 {history_text}
 
 Teniendo en cuenta lo anterior responde esto: {question}
 """.strip()
 
 def build_prompt(question, context, history_text):
-    return PROMPT_TEMPLATE.format(question=question, context=context, history_text=history_text)
+  return PROMPT_TEMPLATE.format(question=question, context=context, history_text=history_text)
